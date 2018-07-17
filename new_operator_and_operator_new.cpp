@@ -19,7 +19,7 @@
  	}
  	void operator delete(void* p,void* o) throw()
  	{
- 		//	only expression,C++标准中并没有相应的实现
+ 		//	only expression,并不需要在这一步释放内存
  	}
 
  	-	重载的 operator new ，有一个默认的版本
