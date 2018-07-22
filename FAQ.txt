@@ -1,3 +1,30 @@
 Q：	空指针与void*的区别
 A：	空指针是暂时不使用的指针使其指向nullptr(C++11)，防止误用出现问题。空指针其实指向了具体的地址，不过指向的地址在内存中比较小，不允许存放数据和不允许程序访问
 	void*型指针指向的内存是可以存放数据的，也是允许程序访问的，不过内存中数据的类型暂时不确定，所以先定义为void*型,需要时再强制转换为相应的数据类型(reinterpret_cast<>())
+
+Q:	DLL中的extern C/.def/__stdcall
+A:	(1)	C++标准对函数Name-Mangling没有规定方案，为了解决重载还会给函数名添加一些标识符，而C标准规定了函数编译后命名的规范，
+	extertn C的作用是告诉C++编译器以C标准方式对函数命名，链接时能正确找到调用的函数
+	(2)	影响函数符号名的因素有C++与C语言的不同、编译器的种类、函数的调用方式(__stdcall、__cdecl[Default])
+	(3)	DLL中的函数被调用时以函数名或函数编号的方式索引的，若导出函数使用extern C & __cdecl的方式，那么函数不需要重命名；若
+	导出函数使用extern C & __stdcall方式，那么函数需要重命名，因为__stdcall调用方式会对函数名修饰
+	(4)	[Recommended] 
+					  函数重命名的方式，可以采用.def文件，但它只对dll有用，对.lib里的函数名称不起作用
+					  .def文件指定导出的函数，同时指定导出函数的名字
+					  使用.def文件，显示调用时导出函数可以不再添加extern C、__declspec(dllexport)声明，__stdcall不能省略，但如果dll是隐式调用，提供的.h文件中仍然
+		需要extern C、__declsepc(dllexport)、__stdcall
+					  若编译链接时找不到.def文件，在链接选项中指定.def文件名
+	(5)	函数调用方式 __stdcall __cdecl
+		__cdecl VC默认的函数调用方式，若生成dll只提供给C/C++程序使用，那么采用默认的方式即可，由函数调用者处理函数的压栈与出栈
+		__stdcall VC允许指定函数的调用方式，C/C++编写的dll可以提供给其他语言使用，但它会导致函数名称的改变，并且dll提供者和调用者
+		需要遵守相同的调用约定，由函数自身处理压栈与出栈
+
+Q:	git 工作区 暂存区 版本库
+A:	git status						--	当前的工作状态
+	git diff						--	工作区和暂存区的区别
+	git diff --staged				--	暂存区和版本库的区别
+	git diff HEAD					--	工作区和版本库的区别
+
+	git checkout --file				--	暂存区覆盖工作区指定内容
+	git checkout HEAD --file		--	版本库替换工作区和暂存区指定内容
+	git reset HEAD					--	版本库覆盖暂存区指定内容
