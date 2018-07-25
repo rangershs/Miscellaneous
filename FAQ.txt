@@ -28,3 +28,7 @@ A:	git status						--	当前的工作状态
 	git checkout --file				--	暂存区覆盖工作区指定内容
 	git checkout HEAD --file		--	版本库替换工作区和暂存区指定内容
 	git reset HEAD					--	版本库覆盖暂存区指定内容
+
+Q:	C++ friend 细节
+A:	借助friend关键字，其他函数和类允许访问当前类中的所有成员，但是，友元函数不同于类的成员函数，不能直接访问类中的成员变量，必须通过其对象访问
+	
