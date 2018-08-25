@@ -172,3 +172,49 @@ float fb = {1e40};	//	error
  *	基于范围的for循环，尽量不要修改容器本身，这很可能导致迭代器失效，从而出现意想不到的结果
  *	即，良好的编程习惯是尽量不要在迭代过程中修改迭代的容器
  */
+
+//	----------------------------------------------------
+//	bind + STL-Algorithms
+
+int count_less_than_10 = std::count_if(List.begin(),List.end(),std::bind(std::less<int>(),std::placeholders::_1,10));
+int count_less_than_10 = std::count_if(List.begin(),List.end(),[](int e){return e < 10;});
+
+int count_greater_than_10 = std::count_if(List.begin(),List.end(),std::bind(std::less<int>(),10,std::placeholders::_1));
+int count_greater_than_10 = std::count_if(List.begin(),List.end(),[](int e){return e > 10;});
+
+auto func = std::bind(std::logical_and<bool>(),std::bind(std::less<int>(),5,std::placeholders::_1),std::bind(std::less<int>(),std::placeholders::_1,10));
+int count_both = std::count_if(List.begin(),List.end(),func);
+int count_both = std::count_if(List.begin(),List.end(),[](int e){return (e>5 && e<10);});
+
+//	----------------------------------------------------
+//	Lambda
+
+[this]	//	捕获this指针，使lambda表达式拥有和类成员函数同样的访问权限，从而可以访问类中的成员函数和成员变量
+		//	带捕获列表的lambda表达式，相当于拥有成员变量的仿函数，即它是有状态的
+
+//	C++11
+int count=0;
+std::for_each(List.begin(),List.end(),[&count](int val)
+	{
+		if(!(val&1))
+		{
+			count++;
+		}
+	});
+
+//	before C++11 functor
+struct Counter
+{
+	Counter(int& count_):count(count_) {}
+	void operator()(int val)
+	{
+		if(!(val&1))
+		{
+			count++;
+		}
+	}
+
+	int& count;
+};
+int count=0;
+std::for_each(List.begin(),List.end(),Counter(count));
