@@ -56,3 +56,20 @@ Print_Value(1);		//	r_value
 int x = 1;
 Print_Value(x);		//	l_value
 Print_Value(std::forward<int>(x));		//	x -> l_value,argument -> r_value
+
+
+//	----------------------------------------------------
+//	variadia template
+//	refer to (MSDN -- https://msdn.microsoft.com/zh-cn/library/dn439779.aspx)
+//	右值引用 + 完美转发 + 可变参数模板
+template<typename Func,typename... Args>
+inline auto FunctionWrapper(Func&& func,Args&&... args)->decltype(func(std::forward<Args>(args)...))
+{
+	return func(std::forward<Args>(args)...);
+}
+
+//	template<typename... Args> returntype functionname(Args... args);
+//	template<typename... Args> returntype functionname(Args&... args);
+//	template<typename... Args> returntype functionname(Args&&... args);
+//	template<typename... Args> returntype functionname(Args*... args);
+//	template<typename... Args> returntype functionname(const Args&... args);
