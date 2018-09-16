@@ -73,3 +73,9 @@ inline auto FunctionWrapper(Func&& func,Args&&... args)->decltype(func(std::forw
 //	template<typename... Args> returntype functionname(Args&&... args);
 //	template<typename... Args> returntype functionname(Args*... args);
 //	template<typename... Args> returntype functionname(const Args&... args);
+
+
+//	----------------------------------------------------
+//	STL的emplace、emplace_back等方法在容器内部构造对象，减少内存的拷贝移动，提高了效率。但是，没有构造函数的对象无法使用
+//	set/map的内部是红黑树，元素的key会自动排序；unordered_set/unordered_map的内部是散列表，不会自动排序，操作元素的效率更高
+//但是自定义类型需要提供hash函数和比较函数
