@@ -59,14 +59,44 @@ Print_Value(std::forward<int>(x));		//	x -> l_value,argument -> r_value
 
 
 //	----------------------------------------------------
+//	追踪返回类型(返回类型后置),没有返回值的追踪返回类型声明为void
+template<typename T1,typename T2>
+decltype(t1+t2)Sum(T1& t1,T2& t2)
+{
+	return t1+t2;								//	syntax error
+}												//	编译器从左至右读入参数，t1与t2在使用前未声明
+template<typename T1,typename T2>
+auto Sum(T1& t1,T2& t2) -> decltype(t1+t2)		//	similar to lambda syntax
+{
+	return t1+t2;
+}
+
+auto pf() -> auto(*)() -> int(*)()
+{
+	return nullptr;
+}
+//	自右向左分析:
+//	auto(*)()->int(*)() 这是一个函数，返回类型是函数指针
+//	pf()是一个函数，它的返回类型仍然是函数指针，只是该函数指针指向返回函数指针的函数auto(*)()
+
+template<typename... B>
+class T:private A<B...> {};
+class T<x,y>:private A<x,y> {};					//	多个参数的派生类,模板参数包在推导中作为一个参数传递
+
+template<typename... B>
+class T:private A<B>... {};
+class T<x,y>:private A<x>,private A<y> {};		//	多重继承的派生类
+
 //	variadia template
 //	refer to (MSDN -- https://msdn.microsoft.com/zh-cn/library/dn439779.aspx)
-//	右值引用 + 完美转发 + 可变参数模板
+//	右值引用 + 完美转发 + 可变参数模板 + auto + decltype
 template<typename Func,typename... Args>
 inline auto FunctionWrapper(Func&& func,Args&&... args)->decltype(func(std::forward<Args>(args)...))
 {
 	return func(std::forward<Args>(args)...);
 }
+								//	(args)... is a function parameter pack
+								//	(args...) is not a function parameter pack
 
 //	template<typename... Args> returntype functionname(Args... args);
 //	template<typename... Args> returntype functionname(Args&... args);
