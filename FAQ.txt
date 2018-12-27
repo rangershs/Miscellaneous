@@ -1,11 +1,12 @@
 ## Frequently Asked Questions
 
-Q：	空指针与void*的区别
+Q：	**空指针与void*的区别**
 
-空指针是暂时不使用的指针使其指向nullptr(C++11)，防止误用出现问题。空指针其实指向了具体的地址，不过指向的地址在内存中比较小，不允许存放数据和不允许程序访问
-void\*型指针指向的内存是可以存放数据的，也是允许程序访问的，不过内存中数据的类型暂时不确定，所以先定义为void*型,需要时再强制转换为相应的数据类型(reinterpret_cast<>())
+* 空指针是暂时不使用的指针使其指向nullptr(C++11)，防止误用出现问题。空指针其实指向了具体的地址，不过指向的地址在内存中比较小，不允许存放数据和不允许程序访问
+* void\*型指针指向的内存是可以存放数据的，也是允许程序访问的，不过内存中数据的类型暂时不确定，所以先定义为void*型,需要时再强制转换为相应的数据类型(reinterpret_cast<>())
+
 ---
-Q:	DLL中的extern C/.def/__stdcall
+Q:	**DLL中的extern C/.def/__stdcall**
 
 *	C++标准对函数Name-Mangling没有规定方案，为了解决重载还会给函数名添加一些标识符，而C标准规定了函数编译后命名的规范，
 extertn C的作用是告诉C++编译器以C标准方式对函数命名，链接时能正确找到调用的函数
@@ -22,8 +23,9 @@ extertn C的作用是告诉C++编译器以C标准方式对函数命名，链接�
 	- __cdecl VC默认的函数调用方式，若生成dll只提供给C/C++程序使用，那么采用默认的方式即可，由函数调用者处理函数的压栈与出栈
 	- __stdcall VC允许指定函数的调用方式，C/C++编写的dll可以提供给其他语言使用，但它会导致函数名称的改变，并且dll提供者和调用者
 	- 需要遵守相同的调用约定，由函数自身处理压栈与出栈
+
 ---
-Q:	git 工作区 暂存区 版本库
+Q:	**git 工作区 暂存区 版本库**
 
 * git status					--	当前的工作状态
 * git diff						--	工作区和暂存区的区别
@@ -33,38 +35,54 @@ Q:	git 工作区 暂存区 版本库
 * git checkout --file			--	暂存区覆盖工作区指定内容
 * git checkout HEAD --file		--	版本库替换工作区和暂存区指定内容
 * git reset HEAD				--	版本库覆盖暂存区指定内容
+
 ---
-Q:	C++ friend 细节
+Q:	**C++ friend 细节**
 
 * 借助friend关键字，其他函数和类允许访问当前类中的所有成员，但是，友元函数不同于类的成员函数，不能直接访问类中的成员变量，必须通过对象访问
 * 类的成员函数调用时会隐式地增加this指针指向调用它的对象，从而使用该对象的成员，而友元函数非成员函数，没有this指针，因此在使用类中成员时必须指定具体的对象
 
 * 友元关系是单向的，友元关系不具有传递性
 * 通常不声明友元类，而只是将其中的成员函数(class::func)声明为友元函数，控制类的作用范围
+
 ---
-Q:	Funtor
+Q:	**Funtor**
 
 仿函数又称函数对象，即类的实例，可以像使用函数一样使用它，其行为是通过在类中重载()实现的，STL中大量使用
 仿函数可以拥有自己的成员变量和成员函数，即它拥有状态，很多行为在编译期就已经确定了
 
 C++11推出的Lambda简化了Funtor的使用，在很多情况下完全可以替代Functor
 但是，Lambda捕获的状态受限于局部作用域，若是全局作用范围，仍然使用仿函数或函数
+
 ---
-Q:	typeid
+Q:	**typeid**
 
 * typeid(type)
 * typeid(expression)
 
 * 返回std::type_info对象的引用，调用std::type_info.name()获取类型
 * type or expression的cv属性会被忽略
-* 如果在多态情况下使用，typeid在运行时获取对象的动态类型；其他情况，typeid在编译期获取对象的静态类型
+* 如果在多态情况下使用，typeid在[运行时]获取对象的动态类型；其他情况，typeid在[编译期]获取对象的静态类型
+
 ---
-Q:	std::mutex & std::recursive_mutex
+Q:	dynamic_cast
+
+*	dynamic_cast
+	- Typically used for down-cast check.
+	- 基类指针调用派生类中特有的方法时；继承自同一基类的派生类指针之间无法完成转换，由同一基类指针转换后调用
+	- 转换依据是由虚表前面的type_info在编译期完成，因此只有包含虚函数的类型才能使用dynamic_cast
+	- 具备类型检查功能(多继承导致C++类型转换也许会改变指针的值)，转换时确保结果的正确性/有效性(错误时:空指针或抛出异常)
+	- [Warning]类型转换和类型检查在程序运行时完成，很多时候通过改善类型设计将其优化为编译期完成，减少dynamic_cast的使用(合理使用重载、多态、模板等特性替代)
+*	优先级: Virtual Function -> dynamic_cast -> typeid
+
+---
+Q:	**std::mutex & std::recursive_mutex**
 
 * 递归锁相对于互斥锁而言，允许同一个线程多次加锁，但是须确保解锁与加锁的次数是一致的。在多数情况下，递归锁可以有效防止死锁的发生
 * 但是，使用递归锁会牺牲一定的效率，更加可怕的是，若使用递归锁后仍然发生了死锁，那么死锁的定位将变得异常困难。而互斥锁发生死锁后，通过调试可以容易地找到死锁发生的位置
+
 ---
-Q:	exe <--> dll 传递对象
+Q:	**exe <--> dll 传递对象**
 
 * exe与dll、dll与dll之间以二进制形式传递数据，不同编译器编译同一class对象的二进制码不同、即使同一编译器以不同编译选项（/MT /MD）编译同一class对象的二进制码也是不一样的
 * 因此跨dll传递class对象（尤其是STL）是不安全的，通常以接口的方式交互	[已验证]
@@ -72,16 +90,18 @@ Q:	exe <--> dll 传递对象
 若以指针的方式传递对象的地址，并且对象是new出来的，那么在/MD选项下正常，而在/MT选项下则会异常，这是因为链接不同RunTimeLibrary导致的（
 https://msdn.microsoft.com/zh-cn/library/ms235460.aspx	）。对于/MT编译选项，在Windows操作环境下可以选择VirtualAlloc/VirtualFree生成/释放内存，那么传递new出来的
 对象就不会出现异常（http://qiusuoge.com/11937.html）	[未验证]
+
 ---
-Q:	函数参数 ->	值传递、指针传递、指针的指针传递(指针的引用)、引用传递
+Q:	**函数参数 ->	值传递、指针传递、指针的指针传递(指针的引用)、引用传递**
 
 可参考	https://blog.csdn.net/u013687632/article/details/78616495
 
 * 值传递，拷贝的是参数的副本，不会把影响扩展到函数外部
 * 引用传递，传递的就是参数本身，在函数内部对其任何操作都会反映到函数外
 * 指针类型不是特殊的类型，在处理方式上与基本数据类型无异。传递指针类型时，若是对指针本身的操作，不会影响指针指向的内存，只有对指针指向内存的操作才会改变内存中的数据
+
 ---
-Q:	Unicode
+Q:	**Unicode**
 
 * ASCII 7位二进制表示128个字符，英文中使用绰绰有余
 * unicode是字符集，UTF-8、UTF-16、UTF-32是编码方式，是字符集的具体实现
@@ -98,8 +118,9 @@ Q:	Unicode
 * locale - en_US.UTF-8,zh_CN.GB2312
 * facet - num_get money_get time_get codecvt
 * 模板类std::codecvt可转换不同编码的字符，配合locale对象使用;wstring_convert与codecvt_utf8、codecvt_utf16、codecvt_utf8_utf16也可以转换不同编码的字符
+
 ---
-Q:	静态成员变量 静态成员函数
+Q:	**静态成员变量 静态成员函数**
 
 * 静态成员变量属于类，由类创建的对象共享该变量;只能在类外初始化，不占用对象的内存，而在全局数据区分配内存空间;通过类名和对象均可以访问
 (全局数据区的数据都会有默认初始值，堆区或栈区的初始值则不一定，因此定义变量的时候尽可能赋初值)
@@ -107,18 +128,185 @@ Q:	静态成员变量 静态成员函数
 
 * 派生类调用基类的构造函数，负责基类成员变量的初始化工作;若没有显示调用，则会调用基类的默认构造函数，若基类没有默认构造函数，那么编译失败
 (派生类并不会继承基类的构造函数，会继承其他函数和成员变量).多态中，基类指针指向派生类对象，允许访问派生类中继承的成员，不能访问派生类中新增的成员
+
 ---
-Q:	std::enable_shared_from_this
+Q:	**std::enable_shared_from_this**
 
 * 在class/struct内部获取自身的std::shared_ptr对象是常有发生的
 * 避免同一个对象被不同的std::shared_ptr对象持有(cause double-delete)，避免std::shared_ptr<T>(this)这样的表达式
 * 在class/struct内部发起异步操作，callback执行时需要保证绑定的对象有效，使用std::shared_ptr可以维持对象的生命周期直至callback结束(保活)
+
 ---
-Q:	指针与引用的使用
+Q:	**指针与引用的使用**
 
-一般在编译层而言，引用是指针的“解引用”语法
+* 一般在编译层而言，引用是指针的“解引用”语法
 
-指针的指向可以改变；指针在使用时必须保证指向的地址不为空；指针直接操作内存，权限较大；
-引用在定义的时候初始化；引用在使用时其对象必须有效，不能引用已释放的对象；引用只能访问关联对象的内存；
+	- 指针的指向可以改变；指针在使用时必须保证指向的地址不为空；指针直接操作内存，权限较大；
+	- 引用在定义的时候初始化；引用在使用时其对象必须有效，不能引用已释放的对象；引用只能访问关联对象的内存；
 
-创建对象后的指向不再更改，且对象使用时是有效的，推荐使用引用；其他情况推荐使用指针.
+* 创建对象后的指向不再更改，且对象使用时是有效的，推荐使用引用；其他情况推荐使用指针.
+
+---
+Q:	**nullptr**
+
+* 大部分计算机不允许用户操作地址为0的内存空间，C++98中将指针赋值为0实现置空
+* C++98中的0具有二义性，它既是整数类型，也可以是无类型指针(void\*)
+	- (void\*)无类型指针，nullptr指针空值
+* nullptr是关键字，是一个常量，它的类型是nullptr_t(char* p = nullptr)即指向常量
+	- `typedef decltype(nullptr) nullptr_t`
+	- nullptr_t类型对象可以隐式地转换为其他类型的指针，可以用于关系运算表达式中
+	- nullptr_t被认为是指针类型，但在模板推导中被推导为T，而非T*；nullptr_t定义的变量取地址为`nullptr_t null; printf("%x\n", &null)`
+	- `sizeof(nullptr)==sizeof(void*)`，二者均可以转换为其他类型指针，但前者是隐式转换，是[关键字]，后者是强制转换
+
+---
+Q:	**decltype**
+
+* C++ RTTI实现机制是为每一个类型产生type_info的数据，在程序中使用typeid查询变量的数据类型，获取类型名
+	- 模板函数is_same的成员value在编译期获得类型，而type_info的成员(hash_code)在运行期获得类型
+* decltype与auto都是在编译期推导出类型从而定义其他变量
+	- decltype 返回表达式的类型，函数名作为decltype()参数则不允许;可以推导出类型的[CV]限定符
+	- auto 在变量定义初始化的时候推导获取类型;不会推导出类型的[CV]限定符
+* 获取已定义的常量、基本类型、运算符、操作符等的类型，再去声明其他变量
+	- 比如获取匿名对象的类型
+	- 追踪返回类型中应用较多
+* decltype(e)
+	- e是重载函数，编译错误
+	- e不带括号，它是标记符表达式或类成员访问表达式，decltype(e)获取的是e实例的类型
+	- e带括号，e的类型是T,若e是一个左值，那么decltype(e)的类型为T&
+	- e带括号，e的类型是T,若e是一个将亡值，那么decltype(e)的类型为T&&
+	- e带括号，e的类型是T,若e是一个纯右值，那么decltype(e)的类型为T
+
+>++i返回i的左值，i++返回右值
+
+>字符串字面常量返回左值，除此以外的字面常量返回纯右值
+
+* C++11的模板类is_lvalue_reference<>,is_rvalue_reference<>的成员value可用于判定获取的类型是左值引用还是右值引用
+	- `is_lvalue_reference<++i>::value`
+	- `is_rvalue_reference<i++>::value`
+
+---
+Q:	**Varadic-Arguments Macro or Function**
+
+* Linux
+	- `#define Print(fmt, arg...) printf(fmt, ##arg)`
+* Windows
+	- `#define Print(fmt, ...) printf(fmt, ##__VA_ARGS__)` [C99]
+* [Warning]
+	- 可变参数函数中va_list,va_start,va_end,va_arg，采用宏的方式定义/实现,使用时用户需要指定参数数量和类型，类型检测不利于编译检查，效率也不高
+	- 因此，非必要情况下尽可能不采用C标准方式，而使用C++标准语法实现
+
+* 可变参数模板函数展开参数包的两种方式：
+	- 递归，1个递归函数和1个递归终止函数
+```
+template<typename T>
+void Print(T t)
+{
+	std::cout << t << std::endl;
+}
+
+template<typename T, typename... Args>
+void Print(T t, Args... args)
+{
+	std::cout << t；
+	Print(args...);
+}
+```
+
+	- 逗号表达式 + 初始化列表
+```
+template<typename T, typename... Args>
+void expand(const T& F, Args&&... args)
+{
+	std::initializer_list<T> ini_list{(F(std::forward<Args>(args)), 0)...};
+}
+expand([](int t)
+{
+	std::cout << t << std::endl;
+}, 1, 2, 3);
+```
+	- Above(参数包中的参数一一展开执行),Below(参数包中的参数作为一个整体传入)
+```
+template<typename T, typename... Args>
+void Functions(const T& F, Args&&... args)
+{
+	F(std::forward<Args>(args)...);
+}
+```
+
+* [Warning]可变参数模板函数与可变参数模板类的参数包展开方式不相同
+
+---
+Q:	**Perfect Forwarding**
+
+*	A function templates forward its arguments without changing their lvalue or rlvalue characteristics.
+Avoid excessive copying, and avoid the template author having to write multiple overloads for lvalue and 
+rvalue references.
+
+Q:	**lvalue -- rvalue**
+
+*	左值和右值是没有关系的，本质区别是能否取到地址；
+模板函数中传递参数，具名的右值会被认为是左值，而不再拥有右值的特性
+>	std::move将参数无条件转换为右值，允许赋予给右值引用或常量左值引用，但只有发生move semantic(move constructor or move assignment)
+>	该值的控制权才会移交出去
+
+* Universal Reference(T&&)
+	- 形式必须如“T&&”
+	- 调用时T的类型必须是推导出来的，而不是事先指定的，不允许用户直接使用
+	- 不会改变左值引用或右值引用的特性
+
+---
+Q:	Win-Service Control Manager
+
+*	MSDN
+	- The service control manager counts the number of times each service has failed since the system booted. The count is reset to 0 if the service has not failed for dwResetPeriod seconds. When the service fails for the Nth time, the service controller performs the action specified in element [N-1] of the lpsaActions array.
+	- If N is greater than cActions, the service controller repeats the last action in the array
+*	SCM是系统管理所有服务的进程
+*	SCM启动Service对应的Process成功后，Service的主线程建立与SCM的连接/通讯 (SCM  <--> Pipe <--> Services)
+*	Process中Dispacher通过ControlHandler处理SCM的控制请求； ServiceMain中尽可能早地注册ControlHandler，从而响应SCM的控制请求
+
+---
+Q:	Noncopyable
+
+*	编译器生成的派生类构造默认调用基类不带参构造；若基类重载了带参构造而没显示定义不带参构造，那么派生类构造时需要指定基类的构造函数(类的不带参构造设置为default)
+*	编译器生成的派生类拷贝构造默认调用基类拷贝构造；若派生类显示定义了拷贝构造，那么需要指定基类的拷贝构造，否则编译器会调用基类的不带参构造
+*	C++11之前的STL存放的对象必须有拷贝语义，不然只能保存指向对象的指针；C++11以后的STL允许存放的对象没有拷贝语义，可以通过移动语义实现
+*	禁用类的拷贝构造和赋值构造，一是避免浅拷贝/深拷贝问题(异常安全的深拷贝有难度)，二是避免基类拷贝问题(显示指定基类的拷贝构造函数)
+*	通常的做法，定义一个基类，其构造/析构[default]，拷贝/赋值[delete]，然后其他类类型继承该类型
+
+---
+Q:	printf in Multi-Thread
+
+*	多线程环境中使用printf将会导致IO中断，从而使本线程挂起，该指令所消耗的时间远远多于普通指令的执行时间
+*	因此，可以将信息先放入到内存队列中，等待多线程任务完成后再将信息输出，提高程序的运行效率
+
+---
+Q:	inline
+
+*	函数定义时生效，仅仅声明函数是无效的
+*	在.cpp文件中定义inline函数，那么该函数是internal，只能在该类型/文件中使用，其他.cpp中调用会出现unsolved external...
+> STD:	"Functions that are declared as inline and that are not class member functions have internal linkage unless otherwise specified."
+> That is typically possible if the inline function is placed in a header file
+*	类的成员函数默认是inline的，是否生效取决于编译器的实现，标准做法是在.h文件中、类类型体外定义实现inline函数(only in the definition outside the class body)
+
+---
+Q:	static
+
+*	在.h或.hpp文件中定义non-static函数，多于一个.cpp文件包含该头文件后，编译时出现函数重复定义的错误 already defined
+	- 可将函数声明为static解决该错误
+*	标准做法是在头文件中声明函数，而在.cpp文件中实现函数体，.hpp文件则大量运用于模板编程
+*	static修饰的变量和函数，const修饰的非extern变量都是内链接，只能在本文件中调用
+	- non-static变量和函数，extern修饰的变量和函数，或extern const int i = 1；等都是外链接，可以在其他文件中使用
+	- 类中的常成员函数不能修改类实例的成员变量，却可以修改类的静态成员变量，因为静态成员变量和静态成员函数属于类，并非属于某个实例对象
+*	static变量或函数在内存只有一份实例，允许修改它的内容，生命期直至程序执行结束为止
+
+---
+Q:	Type of the return of function
+
+*	decltype(Func((Argv&)nulltype)), decltype(Func(*((Argv*)0)))
+> magic number: nulltype and 0
+*	typename std::result_of<Func(Argv)>::type
+*	std::async -> one of implementation
+```
+template<typename Fn, typename... Args>
+future<typename std::result_of<Fn(Args...)>::type> async(Fn&& fn, Args&&... args);
+```
