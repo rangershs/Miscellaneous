@@ -287,6 +287,13 @@ Q:	inline
 > STD:	"Functions that are declared as inline and that are not class member functions have internal linkage unless otherwise specified."
 > That is typically possible if the inline function is placed in a header file
 *	类的成员函数默认是inline的，是否生效取决于编译器的实现，标准做法是在.h文件中、类类型体外定义实现inline函数(only in the definition outside the class body)
+*	inline在函数调用的地方展开，省去了函数入栈、出栈、保存变量等的开销，发生在编译阶段；相比于宏，inline定义的函数会作类型安全检查，也可以进行调试，通常用于短小且调用频繁的函数体
+
+---
+Q: mutable
+
+*	类的const成员函数不允许修改类成员的内容或内部状态，即在逻辑上不改变类成员的函数都应该声明为const,如指针对象，指向同一块内容的指针可以变化，但是指针指向的内容没有变化，也是const的
+*	多线程同步中使用的互斥量mutex在加锁和解锁时状态会改变，与const函数使用时无法通过编译，将其声明为mutable指示编译器其状态的变化与const语义不冲突，并不视为改变对象的成员
 
 ---
 Q:	static
