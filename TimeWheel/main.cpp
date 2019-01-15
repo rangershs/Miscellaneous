@@ -1,21 +1,17 @@
 #include <iostream>
-#include "timer.h"
 #include <thread>
 #include <chrono>
+#include "timer.h"
+#include "TimeWheelOpti.h"
 
-void TimerHandler()
-{
-    std::cout << "TimerHandler: 1s" << std::endl;
-}
+using TimePoint = std::chrono::high_resolution_clock::time_point;
+TimeWheelImple time_wheel;
 
-void TimerHandler_1()
+void TimerHandler(TimePoint _now)
 {
-    std::cout << "TimerHandler: 0.5s" << std::endl;
-}
-
-void TimerHandler_2()
-{
-    std::cout << "TimerHandler: 0.25s" << std::endl;
+    TimePoint now = std::chrono::high_resolution_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(now-_now).count() << std::endl;
+    time_wheel.add_timer(std::bind(&TimerHandler, now), 10);
 }
 
 int main()
@@ -41,6 +37,11 @@ int main()
     std::cout << interval / 60000 << std::endl;
     std::cout << interval % 60000 / 1000 << std::endl;
     std::cout << interval % 60000 % 1000 << std::endl;*/
+
+
+    time_wheel.init();
+    TimePoint now = std::chrono::high_resolution_clock::now();
+    time_wheel.add_timer(std::bind(&TimerHandler, now), 10);
 
     getchar();
     return 0;
