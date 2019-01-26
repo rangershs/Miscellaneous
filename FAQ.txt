@@ -323,3 +323,61 @@ Q:	Type of the return of function
 template<typename Fn, typename... Args>
 future<typename std::result_of<Fn(Args...)>::type> async(Fn&& fn, Args&&... args);
 ```
+
+---
+Q:	RedBlackTree-set vs hash-set
+
+*	红黑树是近似的平衡二叉树,具备自动排序功能,置于其中的元素需要重载'<'
+*	哈希表的查询时间复杂度比红黑树要低,但这种方式占用较多的内存,以空间换取时间;置于其中的元素需要重载'==',以及重载'()'返回Hash Value(即提供该类型的哈希函数)
+*	分别对应于标准库的std::set和std::unordered_set,根据具体的场景和业务需求选择
+
+---
+Q:	std::string vs std::wstring
+
+```
+namespace std
+{
+    typedef basic_string<char> 		string;
+    typedef basic_string<wchar_t> 	wstring;
+}
+
+namespace std
+{
+    template<class charT, class traits = char_traits<charT>, class Allocator = allocator<charT> >
+        class basic_string;
+}
+```
+
+*	"std::string is used for standard ascii (utf-8) strings, 1 byte per character"
+*	"std::wstring is used for wide-character/unicode (utf-16) strings, 2 bytes per character"
+*	"There is no built-in class for utf-32 strings (though you should be able to extend your own from basic_string<> if you need one)"
+
+```
+//	比如中文
+std::string str("汉字");							//	size is 4 char
+std::wstring wstr(L"汉字");						//	size is 2 wchar
+//	注意
+std::string str_ascii("abc*#$");				//	size is 6 char
+std::wstring wstr_ascii(L"abc*#$");				//	size is 6 wchar
+```
+
+---
+Q:	Encode vs Decode
+
+*	base64
+	-	编码/解码,明文转换为不易被识别的密文
+	-	编码后的字符串末尾常有1个或2个'='
+	-	URL、Cookie、Web中传输少量的二进制数据
+
+*	MD5, SHA-A, SHA-2(SHA-256,SHA-512)
+	-	不可逆的摘要算法,验证数据的有效性和完整性
+	-	[散列算法],"任意长度"的输入通过散列算法变换为"固定长度"的输出
+	-	验证下载的文件是否被破坏; 网络TCP/UDP传输中将参数生成摘要用作检验
+
+*	RC4, RC5, AES, DES
+	-	对称密钥加密
+	-	RC4 - 密钥序列与明文数据进行异或(XOR)操作生成密文
+
+*	RSA
+	-	非对称密钥加密
+	-	RSA密钥较短时可以暴力破解,而较长的RSA密钥至今无法有效破解
