@@ -42,6 +42,11 @@ Q:	**git**
 *	"git push <remote> <branch>"		-->	push to your remote
 	-	visual diff and merge tool "p4merge"
 
+*	"git diff"							--> working directory vs staging area
+*	"git diff --staged/cached"			--> staging area vs local repository
+*	"git diff HEAD"						--> working directory vs local repository
+*	"git diff [commit-id][commit-id]"	--> differences between id-1 and id-2
+
 ---
 Q:	**C++ friend 细节**
 
@@ -255,10 +260,18 @@ Q:	**lvalue -- rvalue**
 >	std::move将参数无条件转换为右值，允许赋予给右值引用或常量左值引用，但只有发生move semantic(move constructor or move assignment)
 >	该值的控制权才会移交出去
 
-* Universal Reference(T&&)
+* Universal Reference(T&&)/Forward Reference
 	- 形式必须如“T&&”
 	- 调用时T的类型必须是推导出来的，而不是事先指定的，不允许用户直接使用
 	- 不会改变左值引用或右值引用的特性
+
+---
+Q:	std::decay
+
+*	the reason of using it is std::forward retains lvalue/rvalue nature of object and constant/volatile qualifier
+*	similar to std::remove_cv<std::remove_reference<T>::type>::type
+*	if T is an array type(except for string literal), an array-to-pointer conversion is applied
+*	if T is a function type, a function-to-pointer conversion is applied
 
 ---
 Q:	Win-Service Control Manager
