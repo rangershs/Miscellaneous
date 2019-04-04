@@ -18,6 +18,7 @@ struct TimeWheelImple::TimePos
 
 struct TimeWheelImple::TimerEvent
 {
+    bool                            cycle;
     int                             interval;
     std::function<void(void)>       call_back;
     TimePos                         time_pos;
@@ -56,57 +57,22 @@ bool TimeWheelImple::init()
     return true;
 }
 
-int TimeWheelImple::add_timer(Func _func, int _interval)
+int TimeWheelImple::add_timer(Func _func, int _interval, bool _isCycle)
 {
     if (!_func ||
         _interval <=0 ||
         _interval >= 3600000)
         return -1;
 
-    int min_interval     = _interval / 60000;
-    int s_interval       = _interval % 60000 / 1000;
-    int ms_interval      = _interval % 60000 % 1000;
-
-    int ms_pos           = ms_tick + ms_interval;
-    int s_pos            = s_tick + s_interval;
-    int min_pos          = min_tick + min_interval;
-    int overflow = 0;
-    if (ms_pos >= 1000)
-    {
-        ms_pos %= 1000;
-        overflow = 1;
-    }
-    s_pos += overflow;
-    overflow = 0;
-    if (s_pos >= 60)
-    {
-        s_pos %= 60;
-        overflow = 1;
-    }
-    min_pos += overflow;
-    //  最大时间单位溢出,溢出后min=0的事件实际置于min=60处理
-    if (min_pos > 60)
-    {
-        min_pos %= 60;
-    }
-    else if (min_pos == 60)
-    {
-        min_pos = 60;
-    }
-
-    TimerEvent time_event = {};
-    time_event.interval     = _interval;
-    time_event.call_back    = _func;
-    time_event.time_pos     = {ms_pos, s_pos, min_pos};
-    time_event.timerID      = get_timeID();
+    TimerEvent time_event = calc_timepos(_func, _interval, _isCycle);
 
     std::lock_guard<std::mutex> lck(mutex_);
-    if (min_pos != min_tick)
-        min_vec_[min_pos].emplace_back(time_event);
-    else if (s_pos != s_tick)
-        s_vec_[s_pos].emplace_back(time_event);
+    if (time_event.time_pos.min_pos != min_tick)
+        min_vec_[time_event.time_pos.min_pos].emplace_back(time_event);
+    else if (time_event.time_pos.s_pos != s_tick)
+        s_vec_[time_event.time_pos.s_pos].emplace_back(time_event);
     else
-        ms_vec_[ms_pos].emplace_back(time_event);
+        ms_vec_[time_event.time_pos.ms_pos].emplace_back(time_event);
 
     return time_event.timerID;
 }
@@ -168,8 +134,17 @@ void TimeWheelImple::handleTimer(TimeEpoch _timeepoch)
                 auto item = std::move(lists.front());
                 lists.pop_front();
                 item.call_back();
+                if (item.cycle)
+                {
+                    auto time_event = calc_timepos(item.call_back, item.interval, item.cycle);
+                    if (time_event.time_pos.min_pos != min_tick)
+                        min_vec_[time_event.time_pos.min_pos].emplace_back(time_event);
+                    else if (time_event.time_pos.s_pos != s_tick)
+                        s_vec_[time_event.time_pos.s_pos].emplace_back(time_event);
+                    else
+                        ms_vec_[time_event.time_pos.ms_pos].emplace_back(time_event);
+                }
             }
-
         }
             break;
         case TimeEpoch::TRIGGERED_S :
@@ -189,6 +164,16 @@ void TimeWheelImple::handleTimer(TimeEpoch _timeepoch)
                 else
                 {
                     item.call_back();
+                    if (item.cycle)
+                    {
+                        auto time_event = calc_timepos(item.call_back, item.interval, item.cycle);
+                        if (time_event.time_pos.min_pos != min_tick)
+                            min_vec_[time_event.time_pos.min_pos].emplace_back(time_event);
+                        else if (time_event.time_pos.s_pos != s_tick)
+                            s_vec_[time_event.time_pos.s_pos].emplace_back(time_event);
+                        else
+                            ms_vec_[time_event.time_pos.ms_pos].emplace_back(time_event);
+                    }
                 }
             }
         }
@@ -216,6 +201,16 @@ void TimeWheelImple::handleTimer(TimeEpoch _timeepoch)
                 else
                 {
                     item.call_back();
+                    if (item.cycle)
+                    {
+                        auto time_event = calc_timepos(item.call_back, item.interval, item.cycle);
+                        if (time_event.time_pos.min_pos != min_tick)
+                            min_vec_[time_event.time_pos.min_pos].emplace_back(time_event);
+                        else if (time_event.time_pos.s_pos != s_tick)
+                            s_vec_[time_event.time_pos.s_pos].emplace_back(time_event);
+                        else
+                            ms_vec_[time_event.time_pos.ms_pos].emplace_back(time_event);
+                    }
                 }
             }
         }
@@ -246,4 +241,47 @@ bool TimeWheelImple::search_delete(std::vector<std::list<TimerEvent>>& _timercon
         }
     }
     return false;
+}
+
+TimeWheelImple::TimerEvent TimeWheelImple::calc_timepos(Func _func, int _interval, bool _isCycle)
+{
+    int min_interval     = _interval / 60000;
+    int s_interval       = _interval % 60000 / 1000;
+    int ms_interval      = _interval % 60000 % 1000;
+
+    int ms_pos           = ms_tick + ms_interval;
+    int s_pos            = s_tick + s_interval;
+    int min_pos          = min_tick + min_interval;
+    int overflow = 0;
+    if (ms_pos >= 1000)
+    {
+        ms_pos %= 1000;
+        overflow = 1;
+    }
+    s_pos += overflow;
+    overflow = 0;
+    if (s_pos >= 60)
+    {
+        s_pos %= 60;
+        overflow = 1;
+    }
+    min_pos += overflow;
+    //  最大时间单位溢出,溢出后min=0的事件实际置于min=60处理
+    if (min_pos > 60)
+    {
+        min_pos %= 60;
+    }
+    else if (min_pos == 60)
+    {
+        min_pos = 60;
+    }
+
+    TimerEvent time_event = {};
+    time_event.cycle        = _isCycle;
+    time_event.interval     = _interval;
+    time_event.call_back    = std::move(_func);
+    time_event.time_pos     = {ms_pos, s_pos, min_pos};
+    time_event.timerID      = get_timeID();
+
+    return time_event;
 }

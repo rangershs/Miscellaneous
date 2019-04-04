@@ -29,7 +29,8 @@ public:
 public:
     bool            init();
     //  _interval unit: millisecond
-    int             add_timer(Func _func, int _interval);
+    //  Todo: 回调对象_func中不可调用方法<add_timer>,否则发生死锁
+    int             add_timer(Func _func, int _interval, bool _isCycle= false);
     bool            cancel_timer(int _timerID);
 
     TimeWheelImple();
@@ -40,6 +41,7 @@ private:
     void            handleTimer(TimeEpoch _timeepoch);
     static int      get_timeID();
     bool            search_delete(std::vector<std::list<TimerEvent>>& _timercontainer, int _timerID);
+    TimerEvent      calc_timepos(Func _func, int _interval, bool _isCycle);
 
 private:
     int                                     ms_tick;
