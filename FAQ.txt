@@ -19,10 +19,9 @@ extertn C的作用是告诉C++编译器以C标准方式对函数命名，链接�
 	- 使用.def文件，显示调用时导出函数可以不再添加extern C、__declspec(dllexport)声明，__stdcall不能省略，但如果dll是隐式调用，提供的.h文件中仍然
 	- 需要extern C、__declsepc(dllexport)、__stdcall
 	- 若编译链接时找不到.def文件，在链接选项中指定.def文件名
-*	函数调用方式 __stdcall __cdecl
-	- __cdecl VC默认的函数调用方式，若生成dll只提供给C/C++程序使用，那么采用默认的方式即可，由函数调用者处理函数的压栈与出栈
-	- __stdcall VC允许指定函数的调用方式，C/C++编写的dll可以提供给其他语言使用，但它会导致函数名称的改变，并且dll提供者和调用者
-	- 需要遵守相同的调用约定，由函数自身处理压栈与出栈
+*	函数调用方式(参数入栈顺序、出栈的处理、修饰函数名) __stdcall __cdecl
+	- __cdecl C Declaration，若生成dll只提供给C/C++程序使用，那么采用默认的方式即可，参数从右至左入栈，由函数调用者处理函数的出栈，修饰函数名在函数名前加下划线，如_function
+	- __stdcall Standard Call，微软定义的标准Win API，参数从右至左入栈，由函数自身处理出栈，修饰函数名为下划线、函数名、@和数字的结合，如_function@8
 
 ---
 Q:	**git**
@@ -41,6 +40,11 @@ Q:	**git**
 *	"git pull <remote>"					--> merge it automatically
 *	"git push <remote> <branch>"		-->	push to your remote
 	-	visual diff and merge tool "p4merge"
+
+*	"git diff"							--> working directory vs staging area
+*	"git diff --staged/cached"			--> staging area vs local repository
+*	"git diff HEAD"						--> working directory vs local repository
+*	"git diff [commit-id][commit-id]"	--> differences between id-1 and id-2
 
 ---
 Q:	**C++ friend 细节**
@@ -255,10 +259,18 @@ Q:	**lvalue -- rvalue**
 >	std::move将参数无条件转换为右值，允许赋予给右值引用或常量左值引用，但只有发生move semantic(move constructor or move assignment)
 >	该值的控制权才会移交出去
 
-* Universal Reference(T&&)
+* Universal Reference(T&&)/Forward Reference
 	- 形式必须如“T&&”
 	- 调用时T的类型必须是推导出来的，而不是事先指定的，不允许用户直接使用
 	- 不会改变左值引用或右值引用的特性
+
+---
+Q:	std::decay
+
+*	the reason of using it is std::forward retains lvalue/rvalue nature of object and constant/volatile qualifier
+*	similar to std::remove_cv<std::remove_reference<T>::type>::type
+*	if T is an array type(except for string literal), an array-to-pointer conversion is applied
+*	if T is a function type, a function-to-pointer conversion is applied
 
 ---
 Q:	Win-Service Control Manager
