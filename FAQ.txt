@@ -46,6 +46,25 @@ Q:	**git**
 *	"git diff HEAD"						--> working directory vs local repository
 *	"git diff [commit-id][commit-id]"	--> differences between id-1 and id-2
 
+*	"git branch branch-name"			--> crete a new branch or list current branches
+*	"git log --oneline --decorate --graph --all"
+*										--> show where the branch pointers are pointing (HEAD->)
+*	"git checkout branch-name"			--> switch branches
+*	"git checkout -b branch-name"		-->	create and switch a new branch at the same time
+*	"git branch -d branch-name"			--> delete branch, but delete branches which are not merged in yet will fail
+
+*	"git checkout master"
+*	"git merge branch-name"				--> merge branch into master
+*	"git status"						--> see file which are unmerged
+*	"git branch -v"						--> the last commit on each branch
+*	"git branch -vv"					--> what tracking branches you have set up with more information
+
+*	"git checkout --track origin/serverfix" or "git checkout -b localbranchname origin/serverfix"
+										--> create and track remote branch
+*	"git branch -u origin/serverfix"	--> set a local branch to a remote branch
+*	"git fetch --all; git branch -vv"	--> fetch all remote branches
+*	"get push origin --delete sf"		--> delete remote branch sf
+
 ---
 Q:	**C++ friend 细节**
 
