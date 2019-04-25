@@ -117,20 +117,23 @@ void TrieTree::getNodeValue(Node* node, const std::string& data)
 	}
 }
 
-/*
-  TODO
-  Bug:	只要是叶子结点就会删除, 即使在回溯过程中依然有单词标志存在
-		如果不是叶子结点, 回溯过程中会清除掉所有单词的标志
-*/
 void TrieTree::deleteNode(Node* node, const char* data)
 {
 	if (!data)
 		return;
 
 	if (node->nextNodes.empty())
+	{
+		if (node->isWord)
+			node->isWord = false;
 		return;
+	}
 	else if (*data == '\0')
+	{
+		if (node->isWord)
+			node->isWord = false;
 		return;
+	}
 
 	Node* nextNodePtr(nullptr);
 	for (auto& item : node->nextNodes)
@@ -142,7 +145,7 @@ void TrieTree::deleteNode(Node* node, const char* data)
 		}
 	}
 	deleteNode(nextNodePtr, ++data);
-	if (nextNodePtr->nextNodes.empty())
+	if (nextNodePtr->nextNodes.empty() && !nextNodePtr->isWord)
 	{
 		Node* cur_node = nextNodePtr;
 		node->nextNodes.remove(nextNodePtr);
@@ -151,9 +154,5 @@ void TrieTree::deleteNode(Node* node, const char* data)
 			delete cur_node;
 			cur_node = nullptr;
 		}
-	}
-	else if (nextNodePtr->isWord)
-	{
-		nextNodePtr->isWord = false;
 	}
 }

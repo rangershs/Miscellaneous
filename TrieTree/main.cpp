@@ -30,6 +30,10 @@ int main(int argc, char** argv)
 	trie_tree.traverseTree();
 	std::cout << "-----------------" << std::endl;
 
+	trie_tree.deleteStr("code");
+	trie_tree.traverseTree();
+	std::cout << "-----------------" << std::endl;
+
 	trie_tree.deleteStr("hi");
 	trie_tree.traverseTree();
 	std::cout << "-----------------" << std::endl;
@@ -43,10 +47,6 @@ int main(int argc, char** argv)
 	std::cout << "-----------------" << std::endl;
 
 	trie_tree.deleteStr("fat");
-	trie_tree.traverseTree();
-	std::cout << "-----------------" << std::endl;
-
-	trie_tree.deleteStr("code");
 	trie_tree.traverseTree();
 	std::cout << "-----------------" << std::endl;
 
